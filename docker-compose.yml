@@ -9,6 +9,8 @@ services:
       - "22181:2181"
     networks:
       - kafka-network
+    volumes:
+      - kafka_data:/var/lib/kafka/data
 
   kafka:
     image: confluentinc/cp-kafka:latest
@@ -30,6 +32,7 @@ services:
     build: 
       context: ./producer
       dockerfile: Dockerfile
+    container_name: kafka-producer
     depends_on:
       - kafka
     networks:
@@ -38,11 +41,14 @@ services:
       - ./producer:/app
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_BROKER: kafka:9092
+      TOPIC_NAME: my-topic
 
   consumer:
     build: 
       context: ./consumer
       dockerfile: Dockerfile
+    container_name: kafka-consumer
     depends_on:
       - kafka
     networks:
@@ -51,7 +57,13 @@ services:
       - ./consumer:/app
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_BROKER: kafka:9092
+      TOPIC_NAME: my-topic
 
 networks:
   kafka-network:
     driver: bridge
+
+
+volumes:
+  kafka_data:
